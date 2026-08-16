@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.keys().hasOnly([
+                      'uid', 'fullName', 'email', 'role', 'organizationId',
+                      'organizationName', 'status', 'createdAt', 'updatedAt'
+                    ])
+                    && request.resource.data.uid == userId
+                    && request.resource.data.email == request.auth.token.email
+                    && request.resource.data.fullName is string
+                    && request.resource.data.fullName.size() >= 2
+                    && request.resource.data.fullName.size() <= 120
+                    && request.resource.data.role == 'USER'
+                    && request.resource.data.organizationId == null
+                    && request.resource.data.organizationName == null
+                    && request.resource.data.status == 'ACTIVE';
+
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['fullName', 'updatedAt'])
+                    && request.resource.data.fullName is string
+                    && request.resource.data.fullName.size() >= 2
+                    && request.resource.data.fullName.size() <= 120;
+
+      allow delete: if false;
+    }
+  }
+}

@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+/* Controles cartográficos alineados con la identidad visual de BioGrid. */
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgb(209 250 229);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgb(6 78 59 / 0.12);
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: rgb(240 253 250);
+}
+
+.maplibregl-ctrl-group button:focus-visible {
+  outline: 2px solid rgb(20 184 166);
+  outline-offset: -2px;
+}
+
+.mapbox-gl-draw_ctrl-draw-btn.active,
+.mapbox-gl-draw_ctrl-draw-btn.active:hover {
+  background-color: rgb(6 95 70);
+}
