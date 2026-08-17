@@ -82,6 +82,8 @@ export function RepositorioInformes() {
 
   useEffect(() => {
     const controller = new AbortController();
+    // La carga inicial sincroniza el componente con el repositorio remoto.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadReports(controller.signal);
     return () => controller.abort();
   }, [loadReports]);

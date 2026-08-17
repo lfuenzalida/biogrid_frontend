@@ -27,6 +27,8 @@ export function GuardarInforme({
   const [savedName, setSavedName] = useState("");
 
   useEffect(() => {
+    // Una geometría o filtro nuevo invalida la confirmación del informe anterior.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSavedName("");
   }, [area, gruposBiologicos]);
 
