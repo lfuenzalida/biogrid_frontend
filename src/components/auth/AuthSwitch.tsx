@@ -23,7 +23,7 @@ export function AuthSwitch({ isLogin, onChange }: AuthSwitchProps) {
         onClick={() => onChange(true)}
         aria-pressed={isLogin}
         className={`relative z-10 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors duration-300 ${
-          isLogin ? "text-emerald-900" : "text-white/80"
+          isLogin ? "text-emerald-900" : "text-white"
         }`}
       >
         Iniciar sesión
@@ -33,7 +33,7 @@ export function AuthSwitch({ isLogin, onChange }: AuthSwitchProps) {
         onClick={() => onChange(false)}
         aria-pressed={!isLogin}
         className={`relative z-10 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors duration-300 ${
-          !isLogin ? "text-emerald-900" : "text-emerald-950/60"
+          !isLogin ? "text-emerald-900" : "text-white"
         }`}
       >
         Crear cuenta

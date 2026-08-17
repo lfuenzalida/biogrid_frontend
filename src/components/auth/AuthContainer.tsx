@@ -126,13 +126,13 @@ export function AuthContainer() {
 
       <section className="relative mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-5xl items-center justify-center">
         <div className="grid w-full overflow-hidden rounded-3xl bg-white shadow-2xl shadow-emerald-950/20 md:grid-cols-[0.8fr_1.2fr]">
-          <aside className={`flex flex-col justify-between p-7 transition-all duration-500 sm:p-10 ${isLogin ? "bg-teal-600" : "bg-emerald-800"}`}>
+          <aside className={`flex flex-col justify-between p-7 transition-all duration-500 sm:p-10 ${isLogin ? "bg-teal-700" : "bg-emerald-800"}`}>
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.28em] text-white/75">BioGrid</p>
+              <p className="text-sm font-bold uppercase tracking-[0.28em] text-white">BioGrid</p>
               <h1 className="mt-6 text-3xl font-bold leading-tight text-white sm:text-4xl">
                 {isLogin ? "Tu ecosistema comienza aquí." : "Cultivemos un futuro mejor."}
               </h1>
-              <p className="mt-4 leading-relaxed text-white/80">
+              <p className="mt-4 leading-relaxed text-white">
                 {isLogin ? "Accede a tus proyectos, datos y comunidad en un solo lugar." : "Crea tu cuenta y conecta tecnología, personas y sostenibilidad."}
               </p>
             </div>

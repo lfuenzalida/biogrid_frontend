@@ -13,6 +13,7 @@ import type {
   UserRole,
   UserStatus,
 } from "@/types/profile";
+import { userProfileUpdateSchema } from "@/lib/validation/schemas";
 
 function toDate(value: unknown) {
   return value instanceof Timestamp ? value.toDate() : null;
@@ -60,11 +61,7 @@ export async function updateUserProfile(
   user: User,
   values: UserProfileUpdate,
 ) {
-  const fullName = values.fullName.trim();
-
-  if (fullName.length < 2 || fullName.length > 120) {
-    throw new Error("El nombre debe tener entre 2 y 120 caracteres.");
-  }
+  const { fullName } = userProfileUpdateSchema.parse(values);
 
   const previousDisplayName = user.displayName;
   await updateFirebaseProfile(user, { displayName: fullName });

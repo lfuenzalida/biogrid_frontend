@@ -2,6 +2,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/avistamientos/route";
 
+vi.mock("@/lib/firebase/admin", () => ({
+  verifyFirebaseRequest: vi.fn().mockResolvedValue({ uid: "test-user" }),
+}));
+
+const area = {
+  type: "Feature",
+  properties: {},
+  geometry: {
+    type: "Polygon",
+    coordinates: [[[-70, -33], [-70, -34], [-71, -34], [-70, -33]]],
+  },
+};
+
 const originalApiUrl = process.env.BIOGRID_API_URL;
 const originalApiKey = process.env.BIOGRID_API_KEY;
 
@@ -21,7 +34,7 @@ describe("POST /api/avistamientos", () => {
     delete process.env.BIOGRID_API_KEY;
     const request = new NextRequest("http://localhost/api/avistamientos", {
       method: "POST",
-      body: JSON.stringify({}),
+      body: JSON.stringify(area),
     });
 
     const response = await POST(request);
@@ -30,14 +43,22 @@ describe("POST /api/avistamientos", () => {
 
   it("filtra parámetros y mantiene la API key fuera de la respuesta", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(JSON.stringify({ type: "FeatureCollection", features: [] }), {
+      new Response(JSON.stringify({
+        type: "FeatureCollection",
+        features: [],
+        meta: { total: 0, limit: 1, has_more: false, next_cursor: null },
+      }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }),
     );
     const request = new NextRequest(
       "http://localhost/api/avistamientos?limit=1&unexpected=secret",
-      { method: "POST", body: JSON.stringify({ type: "Feature" }) },
+      {
+        method: "POST",
+        headers: { Authorization: "Bearer test-token" },
+        body: JSON.stringify(area),
+      },
     );
 
     const response = await POST(request);

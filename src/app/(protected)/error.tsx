@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { captureError } from "@/lib/observability";
 
 interface ProtectedErrorProps {
   error: Error & { digest?: string };
@@ -11,7 +12,7 @@ interface ProtectedErrorProps {
 
 export default function ProtectedError({ error, reset }: ProtectedErrorProps) {
   useEffect(() => {
-    console.error("Error en el área privada de BioGrid:", error);
+    captureError(error, { boundary: "protected", digest: error.digest });
   }, [error]);
 
   return (

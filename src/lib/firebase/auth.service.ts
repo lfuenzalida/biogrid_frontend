@@ -7,6 +7,8 @@ import {
 } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "./config";
+import { getToken } from "firebase/app-check";
+import { getFirebaseAppCheck } from "./config";
 
 export function loginWithEmail(email: string, password: string) {
   return signInWithEmailAndPassword(auth, email.trim(), password);
@@ -20,6 +22,12 @@ export async function getFirebaseIdToken(forceRefresh = false) {
   }
 
   return auth.currentUser.getIdToken(forceRefresh);
+}
+
+export async function getFirebaseAppCheckToken() {
+  const appCheck = getFirebaseAppCheck();
+  if (!appCheck) return null;
+  return (await getToken(appCheck)).token;
 }
 
 export function logout() {

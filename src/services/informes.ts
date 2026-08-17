@@ -1,4 +1,13 @@
-import { getFirebaseIdToken } from "@/lib/firebase/auth.service";
+import {
+  getFirebaseAppCheckToken,
+  getFirebaseIdToken,
+} from "@/lib/firebase/auth.service";
+import { fetchWithPolicy } from "@/lib/http/fetch-with-policy";
+import {
+  informeDetailSchema,
+  informeListResponseSchema,
+  parseApiResponse,
+} from "@/lib/validation/schemas";
 import type {
   InformeCreate,
   InformeDetail,
@@ -40,16 +49,33 @@ async function authenticatedFetch(
   input: string,
   init: RequestInit = {},
 ) {
-  const token = await getFirebaseIdToken();
+  const [token, appCheckToken] = await Promise.all([
+    getFirebaseIdToken(),
+    getFirebaseAppCheckToken(),
+  ]);
   const headers = new Headers(init.headers);
   headers.set("Authorization", `Bearer ${token}`);
+  if (appCheckToken) headers.set("X-Firebase-AppCheck", appCheckToken);
   if (init.body) headers.set("Content-Type", "application/json");
 
-  return fetch(input, {
+  const response = await fetchWithPolicy(input, {
     ...init,
     headers,
     cache: "no-store",
+  }, { timeoutMs: 10_000, retries: init.method === undefined ? 1 : 0 });
+
+  if (response.status !== 401) return response;
+
+  const refreshedToken = await getFirebaseIdToken(true);
+  headers.set("Authorization", `Bearer ${refreshedToken}`);
+  const retry = await fetchWithPolicy(input, { ...init, headers, cache: "no-store" }, {
+    timeoutMs: 10_000,
   });
+
+  if (retry.status === 401) {
+    window.dispatchEvent(new Event("biogrid:session-expired"));
+  }
+  return retry;
 }
 
 export async function listarInformes(
@@ -64,7 +90,10 @@ export async function listarInformes(
 
   const response = await authenticatedFetch(`/api/informes?${params}`, { signal });
   if (!response.ok) throw new Error(await readError(response));
-  return response.json() as Promise<InformeListResponse>;
+  return parseApiResponse(
+    informeListResponseSchema,
+    await response.json(),
+  ) as InformeListResponse;
 }
 
 export async function obtenerInforme(
@@ -76,7 +105,7 @@ export async function obtenerInforme(
     { signal },
   );
   if (!response.ok) throw new Error(await readError(response));
-  return response.json() as Promise<InformeDetail>;
+  return parseApiResponse(informeDetailSchema, await response.json()) as InformeDetail;
 }
 
 export async function crearInforme(payload: InformeCreate) {
@@ -85,7 +114,7 @@ export async function crearInforme(payload: InformeCreate) {
     body: JSON.stringify(payload),
   });
   if (!response.ok) throw new Error(await readError(response));
-  return response.json() as Promise<InformeDetail>;
+  return parseApiResponse(informeDetailSchema, await response.json()) as InformeDetail;
 }
 
 export async function actualizarInforme(
@@ -97,7 +126,7 @@ export async function actualizarInforme(
     { method: "PATCH", body: JSON.stringify(payload) },
   );
   if (!response.ok) throw new Error(await readError(response));
-  return response.json() as Promise<InformeDetail>;
+  return parseApiResponse(informeDetailSchema, await response.json()) as InformeDetail;
 }
 
 export async function eliminarInforme(informeId: string) {

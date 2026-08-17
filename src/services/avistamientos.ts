@@ -4,6 +4,12 @@ import type {
   AvistamientosFeatureCollection,
   FiltrosAvistamientos,
 } from "@/types/avistamientos";
+import { getFirebaseAppCheckToken, getFirebaseIdToken } from "@/lib/firebase/auth.service";
+import { fetchWithPolicy } from "@/lib/http/fetch-with-policy";
+import {
+  avistamientosResponseSchema,
+  parseApiResponse,
+} from "@/lib/validation/schemas";
 
 const PAGE_SIZE = 1000;
 const MAX_PAGES = 10;
@@ -76,21 +82,30 @@ export async function buscarAvistamientosPorPoligono(
 
   for (let page = 0; page < MAX_PAGES; page += 1) {
     const params = createSearchParams(filters, cursor);
-    const response = await fetch(`/api/avistamientos?${params.toString()}`, {
+    const [idToken, appCheckToken] = await Promise.all([
+      getFirebaseIdToken(),
+      getFirebaseAppCheckToken(),
+    ]);
+    const headers = new Headers({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    });
+    if (appCheckToken) headers.set("X-Firebase-AppCheck", appCheckToken);
+
+    const response = await fetchWithPolicy(`/api/avistamientos?${params.toString()}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(requestArea),
       cache: "no-store",
       signal,
-    });
+    }, { timeoutMs: 10_000, retries: 1 });
 
     if (!response.ok) throw new Error(await readError(response));
 
-    const pageData = (await response.json()) as AvistamientosFeatureCollection;
-
-    if (pageData.type !== "FeatureCollection" || !Array.isArray(pageData.features)) {
-      throw new Error("La API respondió con un GeoJSON inválido.");
-    }
+    const pageData = parseApiResponse(
+      avistamientosResponseSchema,
+      await response.json(),
+    ) as AvistamientosFeatureCollection;
 
     features.push(...pageData.features);
     total = pageData.meta.total;

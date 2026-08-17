@@ -48,6 +48,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    const handleExpiredSession = () => void logout();
+    window.addEventListener("biogrid:session-expired", handleExpiredSession);
+    return () => window.removeEventListener("biogrid:session-expired", handleExpiredSession);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,

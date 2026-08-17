@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/informes/route";
 
+vi.mock("@/lib/firebase/admin", () => ({
+  verifyFirebaseRequest: vi.fn().mockResolvedValue({ uid: "test-user" }),
+}));
+
 const originalApiUrl = process.env.BIOGRID_API_URL;
 
 describe("/api/informes", () => {
@@ -37,7 +41,17 @@ describe("/api/informes", () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(JSON.stringify({ id: "report-id" }), { status: 201 }),
     );
-    const payload = { nombre: "Informe de prueba" };
+    const payload = {
+      nombre: "Informe de prueba",
+      poligono: {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [[[-70, -33], [-70, -34], [-71, -34], [-70, -33]]],
+        },
+      },
+    };
     const request = new NextRequest("http://localhost/api/informes", {
       method: "POST",
       headers: { Authorization: "Bearer test-token" },

@@ -2,6 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buscarAvistamientosPorPoligono } from "@/services/avistamientos";
 import type { AreaConsulta } from "@/types/avistamientos";
 
+vi.mock("@/lib/firebase/auth.service", () => ({
+  getFirebaseIdToken: vi.fn().mockResolvedValue("test-token"),
+  getFirebaseAppCheckToken: vi.fn().mockResolvedValue(null),
+}));
+
 const area = {
   type: "Feature",
   id: "mapbox-runtime-id",
@@ -56,7 +61,7 @@ describe("buscarAvistamientosPorPoligono", () => {
     );
 
     await expect(buscarAvistamientosPorPoligono(area)).rejects.toThrow(
-      "GeoJSON inválido",
+      "formato incompatible",
     );
   });
 });
