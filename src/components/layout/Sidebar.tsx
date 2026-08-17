@@ -71,6 +71,8 @@ export function Sidebar() {
     const savedPreference = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
 
     if (savedPreference !== null) {
+      // La preferencia solo existe en el navegador y se aplica tras hidratar.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsCollapsed(savedPreference === "true");
     }
 
@@ -83,6 +85,8 @@ export function Sidebar() {
   }, [hasLoadedPreference, isCollapsed]);
 
   useEffect(() => {
+    // Cierra el drawer móvil después de cualquier navegación.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
   }, [pathname]);
 

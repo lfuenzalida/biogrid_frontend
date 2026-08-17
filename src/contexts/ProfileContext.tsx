@@ -60,6 +60,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (authLoading) return;
+    // Sincroniza el perfil cuando Firebase resuelve o cambia el usuario activo.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshProfile();
   }, [authLoading, refreshProfile]);
 

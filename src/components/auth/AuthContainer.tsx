@@ -50,6 +50,8 @@ export function AuthContainer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // El formulario no se renderiza en SSR para impedir un submit nativo pre-hidratación.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsHydrated(true);
   }, []);
 

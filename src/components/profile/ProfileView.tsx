@@ -35,6 +35,8 @@ export function ProfileView() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
+    // El borrador local se reinicia cuando llega una versión nueva del perfil.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (profile) setFullName(profile.fullName);
   }, [profile]);
 
